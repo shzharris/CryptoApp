@@ -51,7 +51,7 @@ extension CoinRow {
                 .foregroundStyle(Color.theme.secondText)
                 .frame(minWidth: 30)
             
-            Circle()
+            CoinImage(coin: coin)
                 .frame(width: 30, height: 30)
             
             Text(coin.symbol.uppercased())

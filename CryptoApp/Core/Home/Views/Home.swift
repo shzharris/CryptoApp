@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct Home: View {
-
+    @EnvironmentObject private var vm: HomeViewModel
     @State private var showPortfolio: Bool = false
 
     var body: some View {
@@ -17,10 +17,18 @@ struct Home: View {
             Color.theme.background.ignoresSafeArea()
             VStack {
                 homeHeader
-                List {
-                    CoinRow(coin: DeveloperPreview.instance.coin, showHoldingColumn: false)
+                
+                columnTitles
+                
+                if !showPortfolio {
+                    allCoinsList
+                    .transition(.move(edge: .leading))
                 }
-                .listStyle(PlainListStyle())
+                
+                if showPortfolio {
+                    portfolioCoinsList
+                        .transition(.move(edge: .trailing))
+                }
                 
                 Spacer(minLength: 0)
             }
@@ -29,13 +37,18 @@ struct Home: View {
     }
 }
 
-#Preview {
-    NavigationView {
-        Home()
-            .navigationBarHidden(true)
-    }
 
+struct Home_Previews: PreviewProvider {
+    static var previews: some View {
+        NavigationView {
+            Home()
+                .toolbar(.hidden, for: .navigationBar)
+//                .navigationBarHidden(true)
+        }
+        .environmentObject(dev.homeVM)
+    }
 }
+
 
 extension Home {
 
@@ -68,6 +81,41 @@ extension Home {
                     }
                 }
         }
+        .padding(.horizontal)
+    }
+    
+    private var allCoinsList : some View {
+        List {
+            ForEach(vm.allCoins) {coin in
+                CoinRow(coin: coin, showHoldingColumn: false)
+                    .listRowInsets(.init(top:10, leading: 0, bottom: 10, trailing: 10))
+            }
+        }
+        .listStyle(PlainListStyle())
+    }
+    
+    private var portfolioCoinsList : some View {
+        List {
+            ForEach(vm.porfolioCoins) {coin in
+                CoinRow(coin: coin, showHoldingColumn: false)
+                    .listRowInsets(.init(top:10, leading: 0, bottom: 10, trailing: 10))
+            }
+        }
+        .listStyle(PlainListStyle())
+    }
+    
+    private var columnTitles: some View {
+        HStack {
+            Text("Coin")
+            Spacer()
+            if showPortfolio {
+                Text("Holdings")
+            }
+            Text("Price")
+                .frame(width: UIScreen.main.bounds.width / 3, alignment: .trailing)
+        }
+        .font(.caption)
+        .foregroundStyle(Color.theme.secondText)
         .padding(.horizontal)
     }
 }
