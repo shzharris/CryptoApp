@@ -10,30 +10,40 @@ import SwiftUI
 struct Home: View {
     @EnvironmentObject private var vm: HomeViewModel
     @State private var showPortfolio: Bool = false
+    @State private var showPortfolioView: Bool = false
 
     var body: some View {
 
         ZStack {
-            Color.theme.background.ignoresSafeArea()
+            Color.theme.background
+                .ignoresSafeArea()
+                .sheet(
+                    isPresented: $showPortfolioView,
+                    content: {
+                        Portfolio()
+                            .environmentObject(vm)
+                    }
+                )
+
             VStack {
                 homeHeader
-                
+
                 HomeStats(showPortfolio: $showPortfolio)
-                
+
                 SearchBar(searchText: $vm.searchText)
-                
+
                 columnTitles
-                
+
                 if !showPortfolio {
                     allCoinsList
-                    .transition(.move(edge: .leading))
+                        .transition(.move(edge: .leading))
                 }
-                
+
                 if showPortfolio {
                     portfolioCoinsList
                         .transition(.move(edge: .trailing))
                 }
-                
+
                 Spacer(minLength: 0)
             }
         }
@@ -41,18 +51,16 @@ struct Home: View {
     }
 }
 
-
 struct Home_Previews: PreviewProvider {
     static var previews: some View {
         NavigationView {
             Home()
                 .toolbar(.hidden, for: .navigationBar)
-//                .navigationBarHidden(true)
+            //                .navigationBarHidden(true)
         }
         .environmentObject(dev.homeVM)
     }
 }
-
 
 extension Home {
 
@@ -61,9 +69,12 @@ extension Home {
         HStack {
             CircleButton(iconName: showPortfolio ? "plus" : "info")
                 .animation(.none, value: showPortfolio)
-                .background(
-                    CircleButtonAnimation(animate: $showPortfolio)
-                )
+                .onTapGesture {
+                    if showPortfolio {
+                        showPortfolioView.toggle()
+                    }
+                }
+
             Spacer()
             Text(showPortfolio ? "Portfolio" : "Live Prices")
                 .font(.headline)
@@ -87,27 +98,31 @@ extension Home {
         }
         .padding(.horizontal)
     }
-    
-    private var allCoinsList : some View {
+
+    private var allCoinsList: some View {
         List {
-            ForEach(vm.allCoins) {coin in
+            ForEach(vm.allCoins) { coin in
                 CoinRow(coin: coin, showHoldingColumn: false)
-                    .listRowInsets(.init(top:10, leading: 0, bottom: 10, trailing: 10))
+                    .listRowInsets(
+                        .init(top: 10, leading: 0, bottom: 10, trailing: 10)
+                    )
             }
         }
         .listStyle(PlainListStyle())
     }
-    
-    private var portfolioCoinsList : some View {
+
+    private var portfolioCoinsList: some View {
         List {
-            ForEach(vm.porfolioCoins) {coin in
+            ForEach(vm.porfolioCoins) { coin in
                 CoinRow(coin: coin, showHoldingColumn: false)
-                    .listRowInsets(.init(top:10, leading: 0, bottom: 10, trailing: 10))
+                    .listRowInsets(
+                        .init(top: 10, leading: 0, bottom: 10, trailing: 10)
+                    )
             }
         }
         .listStyle(PlainListStyle())
     }
-    
+
     private var columnTitles: some View {
         HStack {
             Text("Coin")
@@ -116,7 +131,10 @@ extension Home {
                 Text("Holdings")
             }
             Text("Price")
-                .frame(width: UIScreen.main.bounds.width / 3, alignment: .trailing)
+                .frame(
+                    width: UIScreen.main.bounds.width / 3,
+                    alignment: .trailing
+                )
         }
         .font(.caption)
         .foregroundStyle(Color.theme.secondText)
