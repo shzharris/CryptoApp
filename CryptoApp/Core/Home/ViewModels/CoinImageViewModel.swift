@@ -1,6 +1,6 @@
+import SwiftUI
 import UIKit
 import Foundation
-import SwiftUI
 import Combine
 
 class CoinImageViewModel: ObservableObject {
